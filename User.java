@@ -6,11 +6,23 @@ class User implements UserViewObserver {
     private String userID;
     private List<User> followings;
     private List<String> newsFeed;
+    private long creationTime;
+    private long lastUpdateTime;
 
-    public User(String userID) {
+    public User(String userID, long time) {
         this.userID = userID;
         this.followings = new ArrayList<>();
         this.newsFeed = new ArrayList<>();
+        this.creationTime = time;
+        this.lastUpdateTime = System.currentTimeMillis();
+    }
+    
+    public long getUpdateTime() {
+    	return lastUpdateTime;
+    }
+    
+    public long getTime() {
+    	return creationTime;
     }
 
     public String getUserID() {

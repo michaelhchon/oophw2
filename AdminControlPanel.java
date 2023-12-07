@@ -34,15 +34,15 @@ class AdminControlPanel {
     }
 
     // Create a new user with username
-    public void createUser(String userID) {
-        User newUser = new User(userID);
+    public void createUser(String userID, long time) {
+        User newUser = new User(userID, time);
         users.add(newUser);
         updateUserTree();
     }
 
     // Create group based off ID
-    public void createGroup(String groupID) {
-        UserGroup newGroup = new UserGroup(groupID);
+    public void createGroup(String groupID, long time) {
+        UserGroup newGroup = new UserGroup(groupID, time);
         userGroups.add(newGroup);
         updateUserTree();
     }

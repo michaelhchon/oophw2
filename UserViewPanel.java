@@ -2,6 +2,8 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.*;
+import java.awt.*;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -31,6 +33,8 @@ class UserViewPanel extends JPanel implements UserGroupPanelObserver {
     private JButton createGroupButton;
 
     private JButton openUserViewButton;
+    private JButton validateButton;
+    private JButton lastUpdatedButton;
 
     private JButton showUserTotalButton;
     private JButton showGroupTotalButton;
@@ -59,6 +63,8 @@ class UserViewPanel extends JPanel implements UserGroupPanelObserver {
         createGroupButton = new JButton("Create Group");
 
         openUserViewButton = new JButton("Open User View");
+        validateButton = new JButton("Validate Users/Groups");
+        lastUpdatedButton = new JButton("Last Updated User");
 
         showUserTotalButton = new JButton("Show User Total");
         showGroupTotalButton = new JButton("Show Group Total");
@@ -69,6 +75,8 @@ class UserViewPanel extends JPanel implements UserGroupPanelObserver {
         createUserButton.addActionListener(e -> createUser());
         createGroupButton.addActionListener(e -> createGroup());
         openUserViewButton.addActionListener(e -> openUserView());
+        validateButton.addActionListener(e -> validateUser());
+        lastUpdatedButton.addActionListener(e -> lastUpdated());
         showUserTotalButton.addActionListener(e -> showUserTotal());
         showGroupTotalButton.addActionListener(e -> showGroupTotal());
         showTweetTotalButton.addActionListener(e -> showTweetTotal());
@@ -91,6 +99,14 @@ class UserViewPanel extends JPanel implements UserGroupPanelObserver {
         gbc.gridy = 0;
         midPanel.add(openUserViewButton, gbc);
         
+        // Adding Validate Button under User View
+        gbc.gridy = 10;
+        midPanel.add(validateButton, gbc);
+        
+        // Adding Last Updated User
+        gbc.gridy = 20;
+        midPanel.add(lastUpdatedButton, gbc);
+        
         // Adding 4 buttons on the bottom
         JPanel bottomPanel = new JPanel(new GridLayout(2, 2));
         bottomPanel.add(showUserTotalButton);
@@ -102,11 +118,45 @@ class UserViewPanel extends JPanel implements UserGroupPanelObserver {
         add(midPanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
     }
+    
+    private void lastUpdated() {
+    	long time = 0;
+    	String name = "";
+    	List<User> users = adminControlPanel.getUsers();
+    	for(User user : users) {
+    		if(user.getUpdateTime() > time) {
+    			time = user.getUpdateTime();
+    			name = user.getUserID();
+    		}
+    	}
+    	JOptionPane.showMessageDialog(this, "Last Updated User: " + name);
+    }
+    
+    private void validateUser() {
+    	int check = 1;
+    	List<User> users = adminControlPanel.getUsers();
+    	int size = users.size();
+    	if(size == 0)
+    		JOptionPane.showMessageDialog(this, "No Users");
+    	for(int i = 0; i < size - 1; i++ ) {
+    		for(int j = i + 1; j < size; j++) {
+    			if(users.get(i).equals(users.get(j))) {
+    				check = 0;
+    			}
+    		}
+    		check = 1;
+    	}
+    	if(check == 1)
+    		JOptionPane.showMessageDialog(this, "Valid");
+    	else
+    		JOptionPane.showMessageDialog(this, "Invalid");
+    }
 
     private void createUser() {
         String userID = userInputField.getText().trim();
+        long time = System.currentTimeMillis();
         if (!userID.isEmpty()) {
-            adminControlPanel.createUser(userID);
+            adminControlPanel.createUser(userID, time);
             currentUser = adminControlPanel.getUserByID(userID);
             refreshUI();
         }
@@ -114,8 +164,9 @@ class UserViewPanel extends JPanel implements UserGroupPanelObserver {
 
     private void createGroup() {
         String groupID = groupInputField.getText().trim();
+        long time = System.currentTimeMillis();
         if (!groupID.isEmpty()) {
-            adminControlPanel.createGroup(groupID);
+            adminControlPanel.createGroup(groupID, time);
             refreshUI();
         }
     }
@@ -131,12 +182,18 @@ class UserViewPanel extends JPanel implements UserGroupPanelObserver {
 
         	// User ID and follow button
         	JPanel topPanel = new JPanel(new FlowLayout());
+        	topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         	JLabel userIDLabel = new JLabel("User ID: " + selectedUser.getUserID());
         	JButton followButton = new JButton("Follow");
         	followButton.addActionListener(e -> followUser(selectedUser));
+        	JLabel createTime = new JLabel("Time Created: " + selectedUser.getTime());
+        	JLabel updateTime = new JLabel("Time Last Updated: " + selectedUser.getTime());
         	topPanel.add(userIDLabel);
         	topPanel.add(followButton);
+        	topPanel.add(createTime);
+        	topPanel.add(updateTime);
         	userViewPanel.add(topPanel);
+        	
 
         	// Current followings
         	JPanel followingsPanel = new JPanel(new BorderLayout());
